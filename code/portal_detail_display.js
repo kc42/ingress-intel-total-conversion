@@ -67,7 +67,7 @@ window.renderPortalDetails = function(guid) {
       + '<aside><a href="'+perma+'">portal link</a></aside>'
       + '<aside><a onclick="window.reportPortalIssue()">report issue</a></aside>'
       + '</div>'
-      + '<aside><a target="_blank" href="'+nav+'">nav link</a></aside>'
+      + '<p style="text-align:center"><a target="_blank" href="'+nav+'">'+shortAddress(streetaddress)+'</a></p>'
     );
 
   // try to resolve names that were required for above functions, but
