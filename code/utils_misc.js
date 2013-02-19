@@ -107,7 +107,7 @@ window.reportPortalIssue = function(info) {
 
   //codename, approx addr, portalname
   if(prompt(t, info) !== null)
-    location.href = 'https://support.google.com/ingress?hl=en';
+    window.open('https://support.google.com/ingress?hl=en');
 }
 
 window._storedPaddedBounds = undefined;
