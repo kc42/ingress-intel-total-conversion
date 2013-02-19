@@ -96,8 +96,6 @@ document.getElementsByTagName('body')[0].innerHTML = ''
   + '<a id="sidebartoggle"><span class="toggle close"></span></a>'
   + '<div id="scrollwrapper">' // enable scrolling for small screens
   + '  <div id="sidebar" style="display: none">'
-  + '    <div id="playerstat">t</div>'
-  + '    <div id="gamestat">&nbsp;loading global control stats</div>'
   + '    <input id="geosearch" placeholder="Search location…" type="text"/>'
   + '    <div id="portaldetails"></div>'
   + '    <input id="redeem" placeholder="Redeem code…" type="text"/>'
