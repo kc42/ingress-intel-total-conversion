@@ -130,7 +130,7 @@ window.SIDEBAR_WIDTH = 300;
 // chat messages are requested for the visible viewport. On high zoom
 // levels this gets pretty pointless, so request messages in at least a
 // X km radius.
-window.CHAT_MIN_RANGE = 6;
+window.CHAT_MIN_RANGE = 35;
 // this controls how far data is being drawn outside the viewport. Set
 // it 0 to only draw entities that intersect the current view. A value
 // of one will render an area twice the size of the viewport (or some-
