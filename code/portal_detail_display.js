@@ -47,6 +47,9 @@ window.renderPortalDetails = function(guid) {
   var lng = d.locationE6.lngE6;
   var perma = 'http://ingress.com/intel?latE6='+lat+'&lngE6='+lng+'&z=17&pguid='+guid;
   var imgTitle = 'title="'+getPortalDescriptionFromDetails(d)+'\n\nClick to show full image."';
+  var descObj = d.portalV2.descriptiveText;
+  var streetaddress = descObj.ADDRESS;
+  var nav = 'http://maps.google.com/?saddr=&daddr='+streetaddress.replace(/ /g,'+')+'&directionsmode=driving';
 
   $('#portaldetails')
     .attr('class', TEAM_TO_CSS[getTeam(d)])
@@ -64,6 +67,7 @@ window.renderPortalDetails = function(guid) {
       + '<aside><a href="'+perma+'">portal link</a></aside>'
       + '<aside><a onclick="window.reportPortalIssue()">report issue</a></aside>'
       + '</div>'
+      + '<aside><a target="_blank" href="'+nav+'">nav link</a></aside>'
     );
 
   // try to resolve names that were required for above functions, but
