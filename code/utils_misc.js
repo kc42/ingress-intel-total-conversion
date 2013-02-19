@@ -233,3 +233,13 @@ window.genFourColumnTable = function(blocks) {
   if(t.length % 2 === 1) t + '<td></td><td></td></tr>';
   return t;
 }
+
+window.shortAddress = function(addr) {
+  var shortaddr = addr
+    .replace(' Road,',    ' Rd,')
+    .replace(' Street,',  ' St,')
+    .replace(' Drive,',   ' Dr,')
+    .replace(' Avenue,',  ' Ave,')
+    .replace(/ (NSW|VIC|QLD|TAS|SA|WA|ACT)( \d{4})?, Australia$/,'$2');
+  return shortaddr;
+}

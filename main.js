@@ -96,8 +96,6 @@ document.getElementsByTagName('body')[0].innerHTML = ''
   + '<a id="sidebartoggle"><span class="toggle close"></span></a>'
   + '<div id="scrollwrapper">' // enable scrolling for small screens
   + '  <div id="sidebar" style="display: none">'
-  + '    <div id="playerstat">t</div>'
-  + '    <div id="gamestat">&nbsp;loading global control stats</div>'
   + '    <input id="geosearch" placeholder="Search location…" type="text"/>'
   + '    <div id="portaldetails"></div>'
   + '    <input id="redeem" placeholder="Redeem code…" type="text"/>'
@@ -130,7 +128,7 @@ window.SIDEBAR_WIDTH = 300;
 // chat messages are requested for the visible viewport. On high zoom
 // levels this gets pretty pointless, so request messages in at least a
 // X km radius.
-window.CHAT_MIN_RANGE = 6;
+window.CHAT_MIN_RANGE = 35;
 // this controls how far data is being drawn outside the viewport. Set
 // it 0 to only draw entities that intersect the current view. A value
 // of one will render an area twice the size of the viewport (or some-
@@ -152,7 +150,7 @@ window.MAX_DRAWN_PORTALS = 1000;
 window.MAX_DRAWN_LINKS = 400;
 window.MAX_DRAWN_FIELDS = 200;
 // Minimum zoom level resonator will display
-window.RESONATOR_DISPLAY_ZOOM_LEVEL = 17;
+window.RESONATOR_DISPLAY_ZOOM_LEVEL = 18;
 
 window.COLOR_SELECTED_PORTAL = '#f00';
 window.COLORS = ['#FFCE00', '#0088FF', '#03FE03']; // none, res, enl
