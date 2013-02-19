@@ -57,7 +57,6 @@ window.renderPortalDetails = function(guid) {
       + '<img class="hide" src="'+img+'"/>'
       + '<span id="level">'+Math.floor(getPortalLevel(d))+'</span>'
       + '</div>'
-      + '<div class="mods">'+getModDetails(d)+'</div>'
       + randDetails
       + resoDetails
       + '<div class="linkdetails">'
