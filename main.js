@@ -1,22 +1,31 @@
 // ==UserScript==
 // @id             ingress-intel-total-conversion@breunigs
 // @name           intel map total conversion
-// @version        0.6-@@BUILDDATE@@
+// @version        0.7.7-@@BUILDDATE@@
 // @namespace      https://github.com/breunigs/ingress-intel-total-conversion
 // @updateURL      https://raw.github.com/breunigs/ingress-intel-total-conversion/gh-pages/dist/total-conversion-build.user.js
 // @downloadURL    https://raw.github.com/breunigs/ingress-intel-total-conversion/gh-pages/dist/total-conversion-build.user.js
 // @description    total conversion for the ingress intel map.
 // @include        http://www.ingress.com/intel*
+// @include        https://www.ingress.com/intel*
 // @match          http://www.ingress.com/intel*
+// @match          https://www.ingress.com/intel*
 // ==/UserScript==
 
 
 // REPLACE ORIG SITE ///////////////////////////////////////////////////
 if(document.getElementsByTagName('html')[0].getAttribute('itemscope') != null)
   throw('Ingress Intel Website is down, not a userscript issue.');
+window.iitcBuildDate = '@@BUILDDATE@@';
 
 // disable vanilla JS
 window.onload = function() {};
+
+if(window.location.protocol !== 'https:') {
+  var redir = window.location.href.replace(/^http:/, 'https:');
+  window.location = redir;
+  throw('Need to load HTTPS version.');
+}
 
 // rescue user data from original page
 var scr = document.getElementsByTagName('script');
@@ -49,32 +58,18 @@ for(var i = 0; i < d.length; i++) {
 // player information is now available in a hash like this:
 // window.PLAYER = {"ap": "123", "energy": 123, "available_invites": 123, "nickname": "somenick", "team": "ALIENS||RESISTANCE"};
 
-var ir = window.internalResources || [];
-
-var mainstyle = 'http://breunigs.github.com/ingress-intel-total-conversion/style.css?@@BUILDDATE@@';
-var smartphone = 'http://breunigs.github.com/ingress-intel-total-conversion/smartphone.css?@@BUILDDATE@@';
-var leaflet = 'http://cdn.leafletjs.com/leaflet-0.5/leaflet.css';
-var coda = 'http://fonts.googleapis.com/css?family=Coda';
-
 // remove complete page. We only wanted the user-data and the page’s
 // security context so we can access the API easily. Setup as much as
 // possible without requiring scripts.
 document.getElementsByTagName('head')[0].innerHTML = ''
-  //~ + '<link rel="stylesheet" type="text/css" href="http://0.0.0.0:8000/style.css"/>'
   + '<title>Ingress Intel Map</title>'
-  + (ir.indexOf('mainstyle') === -1
-      ? '<link rel="stylesheet" type="text/css" href="'+mainstyle+'"/>'
-      : '')
-  + (ir.indexOf('leafletcss') === -1
-      ? '<link rel="stylesheet" type="text/css" href="'+leaflet+'"/>'
-      : '')
+  + '<style>@@INCLUDESTRING:style.css@@</style>'
+  + '<style>@@INCLUDESTRING:external/leaflet.css@@</style>'
   // this navigator check is also used in code/smartphone.js
-  + (ir.indexOf('smartphonecss') === -1 && navigator.userAgent.match(/Android.*Mobile/)
-      ? '<link rel="stylesheet" type="text/css" href="'+smartphone+'"/>'
+  + (navigator.userAgent.match(/Android.*Mobile/)
+      ? + '<style>@@INCLUDESTRING:mobile/smartphone.css@@</style>'
       : '')
-  + (ir.indexOf('codafont') === -1
-      ? '<link rel="stylesheet" type="text/css" href="'+coda+'"/>'
-      : '');
+  + '<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Coda"/>';
 
 document.getElementsByTagName('body')[0].innerHTML = ''
   + '<div id="map">Loading, please wait</div>'
@@ -104,7 +99,8 @@ document.getElementsByTagName('body')[0].innerHTML = ''
   + '      <a href="https://github.com/breunigs/ingress-intel-total-conversion#readme" title="IITC = Ingress Intel Total Conversion.\n\nOn the script’s homepage you can:\n– find updates\n– get plugins\n– report bugs\n– and contribute." style="cursor: help">IITC’s page</a></div>'
   + '  </div>'
   + '</div>'
-  + '<div id="updatestatus"></div>';
+  + '<div id="updatestatus"></div>'
+  + '<div id="dialog"></div>';
 
 // putting everything in a wrapper function that in turn is placed in a
 // script tag on the website allows us to execute in the site’s context
@@ -153,7 +149,7 @@ window.MAX_DRAWN_FIELDS = 200;
 window.RESONATOR_DISPLAY_ZOOM_LEVEL = 18;
 
 window.COLOR_SELECTED_PORTAL = '#f00';
-window.COLORS = ['#FFCE00', '#0088FF', '#03FE03']; // none, res, enl
+window.COLORS = ['#FFCE00', '#0088FF', '#03DC03']; // none, res, enl
 window.COLORS_LVL = ['#000', '#FECE5A', '#FFA630', '#FF7315', '#E40000', '#FD2992', '#EB26CD', '#C124E0', '#9627F4'];
 window.COLORS_MOD = {VERY_RARE: '#F78AF6', RARE: '#AD8AFF', COMMON: '#84FBBD'};
 
@@ -174,32 +170,40 @@ window.RANGE_INDICATOR_COLOR = 'red'
 window.PORTAL_RADIUS_ENLARGE_MOBILE = 5;
 
 
-window.DEFAULT_PORTAL_IMG = 'http://commondatastorage.googleapis.com/ingress/img/default-portal-image.png';
+window.DEFAULT_PORTAL_IMG = 'https://commondatastorage.googleapis.com/ingress/img/default-portal-image.png';
 window.NOMINATIM = 'http://nominatim.openstreetmap.org/search?format=json&limit=1&q=';
 
 // INGRESS CONSTANTS /////////////////////////////////////////////////
 // http://decodeingress.me/2012/11/18/ingress-portal-levels-and-link-range/
-var RESO_NRG = [0, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000];
-var MAX_XM_PER_LEVEL = [0, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
-var MIN_AP_FOR_LEVEL = [0, 10000, 30000, 70000, 150000, 300000, 600000, 1200000];
-var HACK_RANGE = 40; // in meters, max. distance from portal to be able to access it
-var OCTANTS = ['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'];
-var DESTROY_RESONATOR = 75; //AP for destroying portal
-var DESTROY_LINK = 187; //AP for destroying link
-var DESTROY_FIELD = 750; //AP for destroying field
-var CAPTURE_PORTAL = 500; //AP for capturing a portal
-var DEPLOY_RESONATOR = 125; //AP for deploying a resonator
-var COMPLETION_BONUS = 250; //AP for deploying all resonators on portal
+window.RESO_NRG = [0, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000];
+window.MAX_XM_PER_LEVEL = [0, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+window.MIN_AP_FOR_LEVEL = [0, 10000, 30000, 70000, 150000, 300000, 600000, 1200000];
+window.HACK_RANGE = 40; // in meters, max. distance from portal to be able to access it
+window.OCTANTS = ['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'];
+window.DESTROY_RESONATOR = 75; //AP for destroying portal
+window.DESTROY_LINK = 187; //AP for destroying link
+window.DESTROY_FIELD = 750; //AP for destroying field
+window.CAPTURE_PORTAL = 500; //AP for capturing a portal
+window.DEPLOY_RESONATOR = 125; //AP for deploying a resonator
+window.COMPLETION_BONUS = 250; //AP for deploying all resonators on portal
 
 // OTHER MORE-OR-LESS CONSTANTS //////////////////////////////////////
-var TEAM_NONE = 0, TEAM_RES = 1, TEAM_ENL = 2;
-var TEAM_TO_CSS = ['none', 'res', 'enl'];
-var TYPE_UNKNOWN = 0, TYPE_PORTAL = 1, TYPE_LINK = 2, TYPE_FIELD = 3, TYPE_PLAYER = 4, TYPE_CHAT = 5, TYPE_RESONATOR = 6;
+window.TEAM_NONE = 0;
+window.TEAM_RES = 1;
+window.TEAM_ENL = 2;
+window.TEAM_TO_CSS = ['none', 'res', 'enl'];
+window.TYPE_UNKNOWN = 0;
+window.TYPE_PORTAL = 1;
+window.TYPE_LINK = 2;
+window.TYPE_FIELD = 3;
+window.TYPE_PLAYER = 4;
+window.TYPE_CHAT = 5;
+window.TYPE_RESONATOR = 6;
 
-var SLOT_TO_LAT = [0, Math.sqrt(2)/2, 1, Math.sqrt(2)/2, 0, -Math.sqrt(2)/2, -1, -Math.sqrt(2)/2];
-var SLOT_TO_LNG = [1, Math.sqrt(2)/2, 0, -Math.sqrt(2)/2, -1, -Math.sqrt(2)/2, 0, Math.sqrt(2)/2];
-var EARTH_RADIUS=6378137;
-var DEG2RAD = Math.PI / 180;
+window.SLOT_TO_LAT = [0, Math.sqrt(2)/2, 1, Math.sqrt(2)/2, 0, -Math.sqrt(2)/2, -1, -Math.sqrt(2)/2];
+window.SLOT_TO_LNG = [1, Math.sqrt(2)/2, 0, -Math.sqrt(2)/2, -1, -Math.sqrt(2)/2, 0, Math.sqrt(2)/2];
+window.EARTH_RADIUS=6378137;
+window.DEG2RAD = Math.PI / 180;
 
 // STORAGE ///////////////////////////////////////////////////////////
 // global variables used for storage. Most likely READ ONLY. Proper

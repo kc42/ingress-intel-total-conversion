@@ -26,7 +26,10 @@ window.renderPortalDetails = function(guid) {
     : null;
   var playerText = player ? ['owner', player] : null;
 
-  var time = d.captured ? unixTimeToString(d.captured.capturedTime) : null;
+  var time = d.captured
+    ? '<span title="' + unixTimeToString(d.captured.capturedTime, true) + '">'
+      +  unixTimeToString(d.captured.capturedTime) + '</span>'
+    : null;
   var sinceText  = time ? ['since', time] : null;
 
   var linkedFields = ['fields', d.portalV2.linkedFields.length];
@@ -34,19 +37,23 @@ window.renderPortalDetails = function(guid) {
   // collect and html-ify random data
   var randDetails = [
     playerText, sinceText, getRangeText(d), getEnergyText(d),
-    linksText, getAvgResoDistText(d), linkedFields, getDestroyAP(d)
+    linksText, getAvgResoDistText(d), linkedFields, getAttackApGainText(d)
   ];
   randDetails = '<table id="randdetails">' + genFourColumnTable(randDetails) + '</table>';
 
   var resoDetails = '<table id="resodetails">' + getResonatorDetails(d) + '</table>';
 
   setPortalIndicators(d);
-  var img = d.imageByUrl && d.imageByUrl.imageUrl ? d.imageByUrl.imageUrl : DEFAULT_PORTAL_IMG;
+  var img = d.imageByUrl && d.imageByUrl.imageUrl
+    ? d.imageByUrl.imageUrl.replace(/^http:/, 'https:')
+    : DEFAULT_PORTAL_IMG;
 
   var lat = d.locationE6.latE6;
   var lng = d.locationE6.lngE6;
   var perma = 'http://ingress.com/intel?latE6='+lat+'&lngE6='+lng+'&z=17&pguid='+guid;
   var imgTitle = 'title="'+getPortalDescriptionFromDetails(d)+'\n\nClick to show full image."';
+  var poslinks = 'window.showPortalPosLinks('+lat/1E6+','+lng/1E6+')';
+  var postcard = 'Send in a postcard. Will put it online after receiving. Address:\\n\\nStefan Breunig\\nINF 305 – R045\\n69120 Heidelberg\\nGermany';
   var descObj = d.portalV2.descriptiveText;
   var streetaddress = descObj.ADDRESS;
   var nav = 'http://maps.google.com/?saddr=&daddr='+streetaddress.replace(/ /g,'+')+'&directionsmode=driving';
@@ -62,8 +69,9 @@ window.renderPortalDetails = function(guid) {
       + '</div>'
       + randDetails
       + resoDetails
-      + '<div class="linkdetails">'
-      + '<aside><a href="'+perma+'">portal link</a></aside>'
+      + '<div class="linkdetails">'+ '<aside><a href="'+perma+'">portal link</a></aside>'
+      + '<aside><a onclick="'+poslinks+'">poslinks</a></aside>'
+      + '<aside><a onclick="alert(\''+postcard+'\');">donate</a></aside>'
       + '<aside><a onclick="window.reportPortalIssue()">report issue</a></aside>'
       + '</div>'
       + '<p style="text-align:center"><a target="_blank" href="'+nav+'">'+shortAddress(streetaddress)+'</a></p>'
